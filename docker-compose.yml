@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  app:
+    image: madelyn2025/system-designer:latest
+    ports:
+      - "80:80"
+    environment:
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+      MYSQL_DB: system_design_chatbot
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: system_design_chatbot
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
